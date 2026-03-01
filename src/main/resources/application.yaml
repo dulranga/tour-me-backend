@@ -1,3 +1,8 @@
 spring:
   application:
     name: tourme
+ 
+server:
+  port: 8010
+
+
