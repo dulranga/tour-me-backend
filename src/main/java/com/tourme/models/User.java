@@ -1,4 +1,4 @@
-package com.tourme.tourme.user.models;
+package com.tourme.models;
 
 import jakarta.persistence.*;
 
