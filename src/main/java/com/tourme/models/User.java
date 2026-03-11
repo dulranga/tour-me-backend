@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "user_type")
 public abstract class User {
 
     @Id
@@ -70,9 +72,11 @@ public abstract class User {
         this.role = role;
     }
 
-    // --- Interface method stubs (IAuthenticable) ---
+    public void login() {
+        System.out.println(this.getClass().getSimpleName() + " " + name + " logged in.");
+    }
 
-    public abstract void login();
-
-    public abstract void logout();
+    public void logout() {
+        System.out.println(this.getClass().getSimpleName() + " " + name + " logged out.");
+    }
 }
