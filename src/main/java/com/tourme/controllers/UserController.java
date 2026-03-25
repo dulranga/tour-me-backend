@@ -1,17 +1,20 @@
 package com.tourme.controllers;
 
-import com.tourme.models.Administrator;
-import com.tourme.models.Driver;
-import com.tourme.models.Tourist;
-import com.tourme.models.User;
-import com.tourme.repositories.UserRepository;
-import com.tourme.services.UserService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.tourme.dto.UserRegisterRequest;
+import com.tourme.models.Tourist;
+import com.tourme.models.User;
+import com.tourme.services.UserService;
 
 @RestController
 @RequestMapping("/api/users")
@@ -45,17 +48,21 @@ public class UserController {
         }
     }
 
-    // /**
-    // * Register a new Tourist
-    // * tourist first comes as .json object then we create a object of relevant
-    // class
-    // * and
-    // * call the service to save the tourist in the database.
-    // */
-    // @PostMapping("/register/tourist")
-    // public Tourist registerTourist(@RequestBody Tourist tourist) {
-    // return userService.registerTourist(tourist);
-    // }
+    /**
+     * Register a new Tourist
+     * tourist first comes as .json object then we create a object of relevant
+     * class
+     * and
+     * call the service to save the tourist in the database.
+     */
+    @PostMapping("/register/tourist")
+    public Tourist registerTourist(@RequestBody UserRegisterRequest data) {
+        Tourist t = new Tourist();
+        t.setName(data.name);
+        t.setEmail(data.email);
+        t.setPasswordHash(data.password);
+        return userService.registerTourist(t);
+    }
 
     // /**
     // * Register a new Driver
