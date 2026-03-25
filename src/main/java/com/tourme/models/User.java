@@ -1,5 +1,7 @@
 package com.tourme.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,13 +19,15 @@ public abstract class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore
     private String passwordHash;
 
     private String role; // "TOURIST", "DRIVER", "ADMINISTRATOR"
 
     // --- Constructors ---
 
-    public User() {}
+    public User() {
+    }
 
     public User(String name, String email, String passwordHash, String role) {
         this.name = name;
