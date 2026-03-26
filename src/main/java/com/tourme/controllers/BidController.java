@@ -55,7 +55,8 @@ public class BidController {
     public ResponseEntity<Bid> getBidById(@PathVariable int id) {
         return bidService.getBidById(id);
     }
-
+ 
+    
     /**
      * Tourist selects a bid for their itinerary.
      * @param id - The ID of the bid to select
