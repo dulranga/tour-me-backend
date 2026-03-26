@@ -69,4 +69,35 @@ public class BidService {
         Optional<Bid> bid = bidRepository.findById(id);
         return bid.isPresent() ? ResponseEntity.ok(bid.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+
+    // Tourist selects a bid
+    public ResponseEntity<?> selectBid(int id, int touristId) {
+        try {
+            // Check if bid exists
+            Optional<Bid> bidOpt = bidRepository.findById(id);
+            if (!bidOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Bid not found");
+            }
+
+            // Check if tourist exists
+            Optional<User> touristOpt = userRepository.findById(touristId);
+            if (!touristOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tourist not found");
+            }
+
+            Bid bid = bidOpt.get();
+
+            // Bid must be PENDING to be selected
+            if (!bid.getStatus().equals("PENDING")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bid is not available");
+            }
+
+            // Accept the bid
+            bid.setStatus("ACCEPTED");
+            bidRepository.save(bid);
+            return ResponseEntity.ok("Bid selected");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
 }
