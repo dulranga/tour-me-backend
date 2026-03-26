@@ -10,6 +10,7 @@ import jakarta.persistence.DiscriminatorValue;
 public class Driver extends User {
 
     private String licenseNumber;
+    private String vehicleDetails;
 
     public Driver() {
         super();
@@ -27,5 +28,13 @@ public class Driver extends User {
 
     public void setLicenseNumber(String licenseNumber) {
         this.licenseNumber = licenseNumber;
+    }
+
+    public String getVehicleDetails() {
+        return vehicleDetails;
+    }
+
+    public void setVehicleDetails(String vehicleDetails) {
+        this.vehicleDetails = vehicleDetails;
     }
 }
