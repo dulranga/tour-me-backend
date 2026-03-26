@@ -1,0 +1,6 @@
+### Update Driver Vehicle Details
+@driverId=3
+PUT {{$dotenv BACKEND_URL}}/api/users/{{driverId}}/vehicle
+Content-Type: application/json
+
+"Honda Civic 2023 - License Plate: ABC123"

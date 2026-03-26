@@ -1,0 +1,9 @@
+### Update User Profile
+@userId=1
+PUT {{$dotenv BACKEND_URL}}/api/users/{{userId}}/profile
+Content-Type: application/json
+
+{
+  "name": "John Updated",
+  "email": "john.updated@example.com"
+}

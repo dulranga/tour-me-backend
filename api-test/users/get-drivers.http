@@ -1,0 +1,3 @@
+### Get All Drivers
+GET {{$dotenv BACKEND_URL}}/api/users/drivers
+Content-Type: application/json

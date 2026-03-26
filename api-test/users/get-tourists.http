@@ -1,0 +1,3 @@
+### Get All Tourists
+GET {{$dotenv BACKEND_URL}}/api/users/tourists
+Content-Type: application/json

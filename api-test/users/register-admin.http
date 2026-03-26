@@ -1,0 +1,10 @@
+### Register Administrator
+POST {{$dotenv BACKEND_URL}}/api/users/register/admin
+Content-Type: application/json
+
+{
+  "name": "Admin User",
+  "email": "admin@example.com",
+  "passwordHash": "adminpass123",
+  "adminRole": "SUPER_ADMIN"
+}

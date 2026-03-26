@@ -1,0 +1,9 @@
+### Register Tourist
+POST {{$dotenv BACKEND_URL}}/api/users/register/tourist
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john2.doe@example.com",
+  "password": "password123"
+}

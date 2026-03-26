@@ -1,0 +1,4 @@
+### Get User By ID
+@userId=1
+GET {{$dotenv BACKEND_URL}}/api/users/{{userId}}
+Content-Type: application/json

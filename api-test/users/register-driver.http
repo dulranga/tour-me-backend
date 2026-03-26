@@ -1,0 +1,11 @@
+### Register Driver
+POST {{$dotenv BACKEND_URL}}/api/users/register/driver
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "email": "jane.smith@example.com",
+  "passwordHash": "password123",
+  "licenseNumber": "DL123456",
+  "vehicleDetails": "Toyota Prius 2024"
+}

@@ -1,0 +1,3 @@
+### Get All Users
+GET {{$dotenv BACKEND_URL}}/api/users
+Content-Type: application/json
