@@ -14,6 +14,9 @@ import com.tourme.exceptions.UserNotFoundException;
 import com.tourme.models.User;
 import com.tourme.services.AuthService;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -31,19 +34,40 @@ public class AuthController {
      * generate a JWT token and return it in the response.
      */
     @PostMapping("/login")
-    public ApiResponse<Map<String, String>> login(@RequestBody Map<String, String> loginRequest) {
+    public ApiResponse<Map<String, String>> login(@RequestBody Map<String, String> loginRequest,
+            HttpServletResponse response) {
         try {
             String email = loginRequest.get("email");
             String password = loginRequest.get("password");
             User u = authService.login(email, password);
 
-            String token = authService.generateToken(u);
+            String accessToken = authService.generateToken(u);
+            String refreshToken = authService.generateRefreshToken(u);
 
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            response.put("userId", String.valueOf(u.getUserId()));
+            // Create and set access token cookie
+            Cookie accessTokenCookie = new Cookie("Authorization", accessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(true); // Only send over HTTPS
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge(24 * 60 * 60); // 24 hours
+            accessTokenCookie.setAttribute("SameSite", "Strict");
+            response.addCookie(accessTokenCookie);
 
-            return ApiResponse.ok("Login successful", response);
+            // Create and set refresh token cookie
+            Cookie refreshTokenCookie = new Cookie("RefreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+            refreshTokenCookie.setAttribute("SameSite", "Strict");
+            response.addCookie(refreshTokenCookie);
+
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("userId", String.valueOf(u.getUserId()));
+            responseData.put("accessToken", accessToken);
+            responseData.put("refreshToken", refreshToken);
+
+            return ApiResponse.ok("Login successful", responseData);
         } catch (UserNotFoundException e) {
             return ApiResponse.notFound("User not found");
         } catch (Exception e) {
@@ -52,37 +76,69 @@ public class AuthController {
         }
     }
 
-    // /*
-    // * authenticate the user by their JWT token and invalidate the token to log
-    // the
-    // * user out.
-    // *
-    // * @param logoutRequest - A map containing the user's JWT token. this is json
-    // * file which we convert to map and then pass it to service.
-    // * call the service to authenticate the user by their JWT token and invalidate
-    // * the token to log the user out.
-    // */
-    // @PostMapping("/logout")
-    // public ResponseEntity<?> logout(@RequestBody Map<String, String>
-    // logoutRequest) {
-    // String token = logoutRequest.get("token");
-    // authService.logout(token);
-    // return ResponseEntity.ok().body("Logout successful");
-    // }
+    /*
+     * authenticate the user by their JWT token and invalidate the token to log
+     * the user out.
+     *
+     * @param logoutRequest - A map containing the user's JWT token. this is json
+     * file which we convert to map and then pass it to service.
+     * call the service to authenticate the user by their JWT token and invalidate
+     * the token to log the user out.
+     */
+    @PostMapping("/logout")
+    public ApiResponse<String> logout(@RequestBody Map<String, String> logoutRequest,
+            HttpServletResponse response) {
 
-    // /*
-    // refresh the user's JWT token by validating the provided refresh token and
-    // generating a new access token if the refresh token is valid.
-    // * @param refreshRequest - A map containing the user's refresh token. this is
-    // json file which we convert to map and then pass it to service.
-    // * call the service to refresh the user's JWT token by validating the provided
-    // refresh token and generating a new access token if the refresh token is
-    // valid.
-    // */
-    // @PostMapping("/refresh-token")
-    // public ResponseEntity<?> refreshToken(@RequestBody Map<String, String>
-    // refreshRequest) {
-    // String refreshToken = refreshRequest.get("refreshToken");
-    // return authService.refreshToken(refreshToken);
-    // }
+        // Clear the access token cookie
+        Cookie authCookie = new Cookie("Authorization", null);
+        authCookie.setHttpOnly(true);
+        authCookie.setSecure(true);
+        authCookie.setPath("/");
+        authCookie.setMaxAge(0); // Delete cookie
+        response.addCookie(authCookie);
+
+        // Clear the refresh token cookie
+        Cookie refreshTokenCookie = new Cookie("RefreshToken", null);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(0); // Delete cookie
+        response.addCookie(refreshTokenCookie);
+
+        return ApiResponse.ok("Logout successful", null);
+    }
+
+    /*
+     * refresh the user's JWT token by validating the provided refresh token and
+     * generating a new access token if the refresh token is valid.
+     * 
+     * @param refreshRequest - A map containing the user's refresh token. this is
+     * json file which we convert to map and then pass it to service.
+     * call the service to refresh the user's JWT token by validating the provided
+     * refresh token and generating a new access token if the refresh token is
+     * valid.
+     */
+    @PostMapping("/refresh-token")
+    public ApiResponse<Map<String, String>> refreshToken(@RequestBody Map<String, String> refreshRequest,
+            HttpServletResponse response) {
+        try {
+            String refreshToken = refreshRequest.get("refreshToken");
+            String newAccessToken = authService.generateTokenFromRefreshToken(refreshToken);
+
+            // Update the access token cookie with new token
+            Cookie accessTokenCookie = new Cookie("Authorization", newAccessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(true);
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge(24 * 60 * 60); // 24 hours
+            response.addCookie(accessTokenCookie);
+
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("accessToken", newAccessToken);
+
+            return ApiResponse.ok("Token refreshed successfully", responseData);
+        } catch (Exception e) {
+            return ApiResponse.unauthorized("Invalid or expired refresh token");
+        }
+    }
 }
