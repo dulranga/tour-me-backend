@@ -4,13 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tourme.dto.ApiResponse;
 import com.tourme.exceptions.UserNotFoundException;
 import com.tourme.models.User;
 import com.tourme.services.AuthService;
@@ -32,7 +31,7 @@ public class AuthController {
      * generate a JWT token and return it in the response.
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
+    public ApiResponse<Map<String, String>> login(@RequestBody Map<String, String> loginRequest) {
         try {
             String email = loginRequest.get("email");
             String password = loginRequest.get("password");
@@ -40,22 +39,17 @@ public class AuthController {
 
             String token = authService.generateToken(u);
 
-            // Create response headers with cookie
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Set-Cookie", "Authorization=" + token + "; Path=/; HttpOnly; SameSite=Strict");
-
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Login successful");
             response.put("token", token);
+            response.put("userId", String.valueOf(u.getUserId()));
 
-            return ResponseEntity.ok().headers(headers).body(response);
+            return ApiResponse.ok("Login successful", response);
         } catch (UserNotFoundException e) {
-            return ResponseEntity.status(404).body("User Not Found");
+            return ApiResponse.notFound("User not found");
         } catch (Exception e) {
             System.err.println("Error during login: " + e.getMessage());
-            return ResponseEntity.status(503).body("Internal Server Error");
+            return ApiResponse.internalServerError("Internal server error");
         }
-
     }
 
     // /*
