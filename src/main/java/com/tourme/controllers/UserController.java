@@ -3,6 +3,7 @@ package com.tourme.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +33,7 @@ public class UserController {
      * dcalls the relevent function in services to fetch all users.
      */
     @GetMapping
-    public ApiResponse<List<User>> getAllUsers() {
+    public ResponseEntity<?> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ApiResponse.ok("Users retrieved successfully", users);
     }
@@ -42,9 +43,8 @@ public class UserController {
      * call the service to fetch a user by their ID.
      */
     @GetMapping("/{id}")
-    public ApiResponse<User> getUserById(@PathVariable int id) {
+    public ResponseEntity<?> getUserById(@PathVariable int id) {
         User u = userService.getUserById(id);
-
         if (u != null) {
             return ApiResponse.ok("User retrieved successfully", u);
         } else {
@@ -58,7 +58,7 @@ public class UserController {
      * class and call the service to save the tourist in the database.
      */
     @PostMapping("/register/tourist")
-    public ApiResponse<Tourist> registerTourist(@RequestBody UserRegisterRequest data) {
+    public ResponseEntity<?> registerTourist(@RequestBody UserRegisterRequest data) {
         Tourist t = new Tourist();
         t.setName(data.name);
         t.setEmail(data.email);
@@ -73,7 +73,7 @@ public class UserController {
      * class and call the service to save the driver in the database.
      */
     @PostMapping("/register/driver")
-    public ApiResponse<Driver> registerDriver(@RequestBody Driver driver) {
+    public ResponseEntity<?> registerDriver(@RequestBody Driver driver) {
         Driver registeredDriver = userService.registerDriver(driver);
         return ApiResponse.ok("Driver registered successfully", registeredDriver);
     }
@@ -85,7 +85,7 @@ public class UserController {
      * call the service to save the admin in the database.
      */
     @PostMapping("/register/admin")
-    public ApiResponse<Administrator> registerAdmin(@RequestBody Administrator admin) {
+    public ResponseEntity<?> registerAdmin(@RequestBody Administrator admin) {
         Administrator registeredAdmin = userService.registerAdmin(admin);
         return ApiResponse.ok("Administrator registered successfully", registeredAdmin);
     }
@@ -95,7 +95,7 @@ public class UserController {
      * call the service to update the user's profile.
      */
     @PutMapping("/{id}/profile")
-    public ApiResponse<User> updateProfile(@PathVariable int id, @RequestBody User profileData) {
+    public ResponseEntity<?> updateProfile(@PathVariable int id, @RequestBody User profileData) {
         try {
             User updatedUser = userService.updateProfile(id, profileData);
             return ApiResponse.ok("Profile updated successfully", updatedUser);
@@ -109,7 +109,7 @@ public class UserController {
      * call the service to update the driver's vehicle details.
      */
     @PutMapping("/{id}/vehicle")
-    public ApiResponse<?> updateVehicleDetails(@PathVariable int id,
+    public ResponseEntity<?> updateVehicleDetails(@PathVariable int id,
             @RequestBody String vehicleDetails) {
         try {
             Driver updatedDriver = userService.updateVehicleDetails(id, vehicleDetails);
@@ -126,7 +126,7 @@ public class UserController {
      * call the service to fetch all tourists.
      */
     @GetMapping("/tourists")
-    public ApiResponse<List<User>> getAllTourists() {
+    public ResponseEntity<?> getAllTourists() {
         List<User> tourists = userService.getAllTourists();
         return ApiResponse.ok("Tourists retrieved successfully", tourists);
     }
@@ -136,7 +136,7 @@ public class UserController {
      * call the service to fetch all drivers.
      */
     @GetMapping("/drivers")
-    public ApiResponse<List<User>> getAllDrivers() {
+    public ResponseEntity<?> getAllDrivers() {
         List<User> drivers = userService.getAllDrivers();
         return ApiResponse.ok("Drivers retrieved successfully", drivers);
     }
@@ -145,7 +145,7 @@ public class UserController {
      * Simple health check endpoint
      */
     @GetMapping("/status")
-    public ApiResponse<String> getStatus() {
+    public ResponseEntity<?> getStatus() {
         return ApiResponse.ok("Service is healthy", "TourMe service is running");
     }
 }

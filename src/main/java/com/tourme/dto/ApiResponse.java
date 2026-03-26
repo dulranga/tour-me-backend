@@ -6,39 +6,29 @@ import org.springframework.http.ResponseEntity;
 /**
  * Standard API Response wrapper for all endpoints
  */
-public class ApiResponse<T> extends ResponseEntity<ApiResponse<T>> {
+public class ApiResponse<T> {
     private boolean success;
     private String message;
     private T data;
+    private HttpStatus status;
 
     public ApiResponse() {
-        super(HttpStatus.OK);
+        this.success = true;
+        this.status = HttpStatus.OK;
     }
 
     public ApiResponse(boolean success, String message, T data) {
-        super(HttpStatus.OK);
         this.success = success;
         this.message = message;
         this.data = data;
-    }
-
-    public ApiResponse(boolean success, String message, T data, HttpStatus status) {
-        super(status);
-        this.success = success;
-        this.message = message;
-        this.data = data;
+        this.status = success ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 
     public ApiResponse(boolean success, String message) {
-        super(HttpStatus.OK);
         this.success = success;
         this.message = message;
         this.data = null;
-    }
-
-    @Override
-    public ApiResponse<T> getBody() {
-        return this;
+        this.status = success ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 
     public boolean isSuccess() {
@@ -65,44 +55,56 @@ public class ApiResponse<T> extends ResponseEntity<ApiResponse<T>> {
         this.data = data;
     }
 
-    // Static builder methods
-    public static <T> ApiResponse<T> ok(String message, T data) {
-        return new ApiResponse<>(true, message, data, HttpStatus.OK);
+    public HttpStatus getStatus() {
+        return status;
     }
 
-    public static <T> ApiResponse<T> created(String message, T data) {
-        return new ApiResponse<>(true, message, data, HttpStatus.CREATED);
+    public void setStatus(HttpStatus status) {
+        this.status = status;
     }
 
-    public static <T> ApiResponse<T> accepted(String message, T data) {
-        return new ApiResponse<>(true, message, data, HttpStatus.ACCEPTED);
+    public ResponseEntity<?> toResponseEntity() {
+        return ResponseEntity.status(this.status).body(this);
     }
 
-    public static <T> ApiResponse<T> badRequest(String message) {
-        return new ApiResponse<>(false, message, null, HttpStatus.BAD_REQUEST);
+    // Static builder methods - returning ResponseEntity directly
+    public static <T> ResponseEntity<?> ok(String message, T data) {
+        return new ResponseEntity<>(new ApiResponse<>(true, message, data), HttpStatus.OK);
     }
 
-    public static <T> ApiResponse<T> badRequest(String message, T data) {
-        return new ApiResponse<>(false, message, data, HttpStatus.BAD_REQUEST);
+    public static <T> ResponseEntity<?> created(String message, T data) {
+        return new ResponseEntity<>(new ApiResponse<>(true, message, data), HttpStatus.CREATED);
     }
 
-    public static <T> ApiResponse<T> notFound(String message) {
-        return new ApiResponse<>(false, message, null, HttpStatus.NOT_FOUND);
+    public static <T> ResponseEntity<?> accepted(String message, T data) {
+        return new ResponseEntity<>(new ApiResponse<>(true, message, data), HttpStatus.ACCEPTED);
     }
 
-    public static <T> ApiResponse<T> unauthorized(String message) {
-        return new ApiResponse<>(false, message, null, HttpStatus.UNAUTHORIZED);
+    public static <T> ResponseEntity<?> badRequest(String message) {
+        return new ResponseEntity<>(new ApiResponse<>(false, message, null), HttpStatus.BAD_REQUEST);
     }
 
-    public static <T> ApiResponse<T> forbidden(String message) {
-        return new ApiResponse<>(false, message, null, HttpStatus.FORBIDDEN);
+    public static <T> ResponseEntity<?> badRequest(String message, T data) {
+        return new ResponseEntity<>(new ApiResponse<>(false, message, data), HttpStatus.BAD_REQUEST);
     }
 
-    public static <T> ApiResponse<T> internalServerError(String message) {
-        return new ApiResponse<>(false, message, null, HttpStatus.INTERNAL_SERVER_ERROR);
+    public static <T> ResponseEntity<?> notFound(String message) {
+        return new ResponseEntity<>(new ApiResponse<>(false, message, null), HttpStatus.NOT_FOUND);
     }
 
-    public static <T> ApiResponse<T> status(boolean success, String message, T data, HttpStatus status) {
-        return new ApiResponse<>(success, message, data, status);
+    public static <T> ResponseEntity<?> unauthorized(String message) {
+        return new ResponseEntity<>(new ApiResponse<>(false, message, null), HttpStatus.UNAUTHORIZED);
+    }
+
+    public static <T> ResponseEntity<?> forbidden(String message) {
+        return new ResponseEntity<>(new ApiResponse<>(false, message, null), HttpStatus.FORBIDDEN);
+    }
+
+    public static <T> ResponseEntity<?> internalServerError(String message) {
+        return new ResponseEntity<>(new ApiResponse<>(false, message, null), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public static <T> ResponseEntity<?> status(boolean success, String message, T data, HttpStatus httpStatus) {
+        return new ResponseEntity<>(new ApiResponse<>(success, message, data), httpStatus);
     }
 }

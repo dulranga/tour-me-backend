@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +35,7 @@ public class AuthController {
      * generate a JWT token and return it in the response.
      */
     @PostMapping("/login")
-    public ApiResponse<Map<String, String>> login(@RequestBody Map<String, String> loginRequest,
+    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest,
             HttpServletResponse response) {
         try {
             String email = loginRequest.get("email");
@@ -86,7 +87,7 @@ public class AuthController {
      * the token to log the user out.
      */
     @PostMapping("/logout")
-    public ApiResponse<String> logout(@RequestBody Map<String, String> logoutRequest,
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> logoutRequest,
             HttpServletResponse response) {
 
         // Clear the access token cookie
@@ -119,7 +120,7 @@ public class AuthController {
      * valid.
      */
     @PostMapping("/refresh-token")
-    public ApiResponse<Map<String, String>> refreshToken(@RequestBody Map<String, String> refreshRequest,
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> refreshRequest,
             HttpServletResponse response) {
         try {
             String refreshToken = refreshRequest.get("refreshToken");
