@@ -69,3 +69,4 @@ public class BidService {
         Optional<Bid> bid = bidRepository.findById(id);
         return bid.isPresent() ? ResponseEntity.ok(bid.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+}
