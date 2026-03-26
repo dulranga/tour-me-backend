@@ -53,3 +53,19 @@ public class BidService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
+
+    // Get all bids for an itinerary
+    public List<Bid> getBidsForItinerary(int itineraryId) {
+        return bidRepository.findByItinerary_ItineraryId(itineraryId);
+    }
+
+    // Get all bids from a driver
+    public List<Bid> getBidsForDriver(int driverId) {
+        return bidRepository.findByDriver_UserId(driverId);
+    }
+
+    // Get a bid by ID
+    public ResponseEntity<Bid> getBidById(int id) {
+        Optional<Bid> bid = bidRepository.findById(id);
+        return bid.isPresent() ? ResponseEntity.ok(bid.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
