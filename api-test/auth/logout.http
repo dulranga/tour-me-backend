@@ -1,0 +1,7 @@
+### Logout User
+POST {{$dotenv BACKEND_URL}}/api/auth/logout
+Content-Type: application/json
+Cookie: Authorization=YOUR_TOKEN_HERE
+
+{
+}

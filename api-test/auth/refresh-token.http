@@ -1,0 +1,8 @@
+### Refresh Access Token
+POST {{$dotenv BACKEND_URL}}/api/auth/refresh-token
+Content-Type: application/json
+Cookie: RefreshToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3IiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NzQ1MzM3MzgsImV4cCI6MTc3NTEzODUzOH0.pIFnOHwENjTAd94QZ8M5I7t3-4Lzqbi5dunWaSF3SuI
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3IiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NzQ1MzM3MzgsImV4cCI6MTc3NTEzODUzOH0.pIFnOHwENjTAd94QZ8M5I7t3-4Lzqbi5dunWaSF3SuI"
+}
