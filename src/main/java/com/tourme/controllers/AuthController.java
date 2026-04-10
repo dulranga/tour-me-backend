@@ -34,10 +34,12 @@ public class AuthController {
      * call the service to check the credentials of the user and if they are valid,
      * generate a JWT token and return it in the response.
      */
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest,
             HttpServletResponse response) {
         try {
+
             String email = loginRequest.get("email");
             String password = loginRequest.get("password");
             User u = authService.login(email, password);

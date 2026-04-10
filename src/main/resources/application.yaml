@@ -22,3 +22,31 @@ server:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+  show-actuator: true
+  info:
+    title: TourMe API
+    description: A bidding platform for finding the best deals when travelling in Sri Lanka
+    version: 1.0.0
+    contact:
+      name: TourMe Support
+      email: support@tourme.com
+    license:
+      name: MIT License
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
