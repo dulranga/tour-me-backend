@@ -1,5 +1,6 @@
 package com.tourme.controllers;
 
+import com.tourme.dto.ApiResponse;
 import com.tourme.models.Bid;
 import com.tourme.services.BidService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,52 +17,70 @@ public class BidController {
 
     /**
      * Submit a new bid for an itinerary by a driver.
-     * @param driverId - The ID of the driver placing the bid, used as a foreign key
-     * @param itineraryId - The ID of the itinerary the bid is for, used as a foreign key
-     * @param bid - The bid details. this is json file which we convert to object of bid class and then pass it to service.
-     * call the service to submit a new bid for the specified itinerary by the specified driver. 
+     * 
+     * @param driverId    - The ID of the driver placing the bid, used as a foreign
+     *                    key
+     * @param itineraryId - The ID of the itinerary the bid is for, used as a
+     *                    foreign key
+     * @param bid         - The bid details. this is json file which we convert to
+     *                    object of bid class and then pass it to service.
+     *                    call the service to submit a new bid for the specified
+     *                    itinerary by the specified driver.
      */
     @PostMapping
-    public ResponseEntity<?> submitBid(@RequestParam int driverId, @RequestParam int itineraryId, @RequestBody Bid bid) {
+    public ResponseEntity<?> submitBid(@RequestParam int driverId, @RequestParam int itineraryId,
+            @RequestBody Bid bid) {
         return bidService.submitBid(driverId, itineraryId, bid);
     }
 
     /**
      * Get all bids placed for a specific itinerary.
+     * 
      * @param itineraryId - The ID of the itinerary
-     * call the service to fetch all bids placed for a specific itinerary using its ID.
+     *                    call the service to fetch all bids placed for a specific
+     *                    itinerary using its ID.
      */
     @GetMapping("/itinerary/{itineraryId}")
-    public List<Bid> getBidsForItinerary(@PathVariable int itineraryId) {
-        return bidService.getBidsForItinerary(itineraryId);
+    public ResponseEntity<?> getBidsForItinerary(@PathVariable int itineraryId) {
+        List<Bid> bids = bidService.getBidsForItinerary(itineraryId);
+        return ApiResponse.ok("Bids retrieved successfully", bids);
     }
 
     /**
      * Get bids submitted by a specific driver.
+     * 
      * @param driverId - The ID of the driver
-     * call the service to fetch all bids submitted by a specific driver using their user ID.
+     *                 call the service to fetch all bids submitted by a specific
+     *                 driver using their user ID.
      */
     @GetMapping("/driver/{driverId}")
-    public List<Bid> getBidsForDriver(@PathVariable int driverId) {
-        return bidService.getBidsForDriver(driverId);
+    public ResponseEntity<?> getBidsForDriver(@PathVariable int driverId) {
+        List<Bid> bids = bidService.getBidsForDriver(driverId);
+        return ApiResponse.ok("Driver bids retrieved successfully", bids);
     }
 
     /**
      * Get a single bid by ID.
+     * 
      * @param id - The ID of the bid
-     * call the service to fetch the details of a specific bid by its ID.
+     *           call the service to fetch the details of a specific bid by its ID.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Bid> getBidById(@PathVariable int id) {
-        return bidService.getBidById(id);
+    public ResponseEntity<?> getBidById(@PathVariable int id) {
+        ResponseEntity<Bid> response = bidService.getBidById(id);
+        if (response.getStatusCode().value() == 200) {
+            return ApiResponse.ok("Bid retrieved successfully", response.getBody());
+        }
+        return ApiResponse.notFound("Bid not found");
     }
- 
-    
+
     /**
      * Tourist selects a bid for their itinerary.
-     * @param id - The ID of the bid to select
+     * 
+     * @param id        - The ID of the bid to select
      * @param touristId - The ID of the tourist selecting the bid.
-     * call the service to select a bid for an itinerary by its ID and the tourist's user ID.
+     *                  call the service to select a bid for an itinerary by its ID
+     *                  and the tourist's user ID.
      */
     @PostMapping("/{id}/select")
     public ResponseEntity<?> selectBid(@PathVariable int id, @RequestParam int touristId) {
