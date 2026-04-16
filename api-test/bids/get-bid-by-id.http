@@ -1,0 +1,2 @@
+### Get Bid by ID
+GET {{$dotenv BACKEND_URL}}/api/bids/1

@@ -1,0 +1,2 @@
+### Cancel Itinerary
+DELETE {{$dotenv BACKEND_URL}}/api/itineraries/1

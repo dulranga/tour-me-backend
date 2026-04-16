@@ -1,0 +1,2 @@
+### Select Bid
+POST {{$dotenv BACKEND_URL}}/api/bids/1/select?touristId=1

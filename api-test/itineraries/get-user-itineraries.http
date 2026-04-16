@@ -1,0 +1,2 @@
+### Get User's Itineraries
+GET {{$dotenv BACKEND_URL}}/api/itineraries/user/1

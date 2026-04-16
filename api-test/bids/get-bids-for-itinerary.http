@@ -1,0 +1,2 @@
+### Get Bids for Itinerary
+GET {{$dotenv BACKEND_URL}}/api/bids/itinerary/1

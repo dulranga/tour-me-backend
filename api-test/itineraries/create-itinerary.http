@@ -1,0 +1,13 @@
+### Create Itinerary
+POST {{$dotenv BACKEND_URL}}/api/itineraries?touristId=1
+Content-Type: application/json
+
+{
+  "pickupLocation": "Central Station",
+  "destination": "Beach Resort",
+  "pickupTime": "2025-05-20T10:00:00",
+  "estimatedDistance": 50.5,
+  "estimatedDuration": 120,
+  "numberOfPassengers": 3,
+  "specialRequests": "Window seats preferred"
+}

@@ -1,0 +1,2 @@
+### Get Bids for Driver
+GET {{$dotenv BACKEND_URL}}/api/bids/driver/2

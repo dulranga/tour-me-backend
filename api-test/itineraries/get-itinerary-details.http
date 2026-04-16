@@ -1,0 +1,2 @@
+### Get Itinerary Details
+GET {{$dotenv BACKEND_URL}}/api/itineraries/1

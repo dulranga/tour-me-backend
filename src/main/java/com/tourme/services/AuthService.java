@@ -96,4 +96,22 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid or expired refresh token", e);
         }
     }
+
+    public User getUserFromToken(String token) {
+        try {
+            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+            var jws = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+
+            String userId = jws.getPayload().getSubject();
+            User user = userRepository.findById(Integer.parseInt(userId))
+                    .orElseThrow(() -> new UserNotFoundException());
+
+            return user;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid or expired token", e);
+        }
+    }
 }

@@ -1,0 +1,10 @@
+### Submit Bid
+POST {{$dotenv BACKEND_URL}}/api/bids?driverId=2&itineraryId=1
+Content-Type: application/json
+
+{
+  "bidAmount": 50.00,
+  "estimatedArrivalTime": "2025-05-20T09:45:00",
+  "vehicleType": "Sedan",
+  "notes": "Professional driver with 5 years experience"
+}

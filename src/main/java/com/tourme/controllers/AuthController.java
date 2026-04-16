@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.tourme.models.User;
 import com.tourme.services.AuthService;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
@@ -142,6 +144,42 @@ public class AuthController {
             return ApiResponse.ok("Token refreshed successfully", responseData);
         } catch (Exception e) {
             return ApiResponse.unauthorized("Invalid or expired refresh token");
+        }
+    }
+
+    /*
+     * Get the current authenticated user from the JWT token stored in the
+     * Authorization cookie.
+     * 
+     * @param request - The HTTP request containing the Authorization cookie
+     * 
+     * @return The current user's information
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+        try {
+            String token = null;
+
+            // Extract token from Authorization cookie
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("Authorization".equals(cookie.getName())) {
+                        token = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+
+            if (token == null) {
+                return ApiResponse.unauthorized("No authentication token found");
+            }
+
+            User currentUser = authService.getUserFromToken(token);
+            return ApiResponse.ok("Current user retrieved successfully", currentUser);
+        } catch (UserNotFoundException e) {
+            return ApiResponse.notFound("User not found");
+        } catch (Exception e) {
+            return ApiResponse.unauthorized("Invalid or expired token");
         }
     }
 }
