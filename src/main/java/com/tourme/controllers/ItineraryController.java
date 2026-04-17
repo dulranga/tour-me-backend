@@ -7,9 +7,11 @@ import com.tourme.models.User;
 import com.tourme.repositories.ItineraryRepository;
 import com.tourme.repositories.UserRepository;
 import com.tourme.services.ItineraryService;
+import com.tourme.services.ReceiptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
@@ -25,6 +27,9 @@ public class ItineraryController {
     @Autowired
     private ItineraryService itineraryService;
 
+    @Autowired
+    private ReceiptService receiptService;
+
     /**
      * Create a new itinerary for a specific tourist
      * 
@@ -39,7 +44,11 @@ public class ItineraryController {
      */
     @PostMapping
     public ResponseEntity<?> createItinerary(@RequestParam int touristId, @RequestBody Itinerary itinerary) {
-        return itineraryService.createItinerary(touristId, itinerary);
+        try {
+            return itineraryService.createItinerary(touristId, itinerary);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to create itinerary: " + e.getMessage());
+        }
     }
 
     /**
@@ -62,11 +71,7 @@ public class ItineraryController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getItineraryDetails(@PathVariable int id) {
-        ResponseEntity<Itinerary> response = itineraryService.getItineraryById(id);
-        if (response.getStatusCode().value() == 200) {
-            return ApiResponse.ok("Itinerary retrieved successfully", response.getBody());
-        }
-        return ApiResponse.notFound("Itinerary not found");
+        return itineraryService.getItineraryById(id);
     }
 
     /**
@@ -91,6 +96,54 @@ public class ItineraryController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> cancelItinerary(@PathVariable int id) {
-        return itineraryService.cancelItinerary(id);
+        try {
+            return itineraryService.cancelItinerary(id);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to cancel itinerary: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Upload a receipt for an itinerary
+     * 
+     * @param itineraryId - The ID of the itinerary
+     * @param file        - The receipt file to upload
+     */
+    @PostMapping("/{itineraryId}/receipt")
+    public ResponseEntity<?> uploadReceipt(@PathVariable int itineraryId,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            return receiptService.uploadReceipt(itineraryId, file);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to upload receipt: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get receipt for an itinerary
+     * 
+     * @param itineraryId - The ID of the itinerary
+     */
+    @GetMapping("/{itineraryId}/receipt")
+    public ResponseEntity<?> getReceipt(@PathVariable int itineraryId) {
+        try {
+            return receiptService.getReceipt(itineraryId);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to retrieve receipt: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Delete receipt for an itinerary
+     * 
+     * @param itineraryId - The ID of the itinerary
+     */
+    @DeleteMapping("/{itineraryId}/receipt")
+    public ResponseEntity<?> deleteReceipt(@PathVariable int itineraryId) {
+        try {
+            return receiptService.deleteReceipt(itineraryId);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to delete receipt: " + e.getMessage());
+        }
     }
 }

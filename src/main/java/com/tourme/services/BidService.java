@@ -1,5 +1,6 @@
 package com.tourme.services;
 
+import com.tourme.dto.ApiResponse;
 import com.tourme.models.Bid;
 import com.tourme.models.Driver;
 import com.tourme.models.Itinerary;
@@ -33,13 +34,13 @@ public class BidService {
             // Check if driver exists
             Optional<User> driverOpt = userRepository.findById(driverId);
             if (!driverOpt.isPresent() || !(driverOpt.get() instanceof Driver)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Driver not found");
+                return ApiResponse.notFound("Driver not found");
             }
 
             // Check if itinerary exists
             Optional<Itinerary> itineraryOpt = itineraryRepository.findById(itineraryId);
             if (!itineraryOpt.isPresent()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Itinerary not found");
+                return ApiResponse.notFound("Itinerary not found");
             }
 
             // Set bid details
@@ -48,9 +49,9 @@ public class BidService {
             bid.setStatus("PENDING");
 
             // Save and return
-            return ResponseEntity.status(HttpStatus.CREATED).body(bidRepository.save(bid));
+            return ApiResponse.created("Bid submitted successfully", bidRepository.save(bid));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            return ApiResponse.internalServerError("Failed to submit bid: " + e.getMessage());
         }
     }
 
@@ -65,9 +66,12 @@ public class BidService {
     }
 
     // Get a bid by ID
-    public ResponseEntity<Bid> getBidById(int id) {
+    public ResponseEntity<?> getBidById(int id) {
         Optional<Bid> bid = bidRepository.findById(id);
-        return bid.isPresent() ? ResponseEntity.ok(bid.get()) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if (bid.isPresent()) {
+            return ApiResponse.ok("Bid retrieved successfully", bid.get());
+        }
+        return ApiResponse.notFound("Bid not found");
     }
 
     // Tourist selects a bid
@@ -76,28 +80,58 @@ public class BidService {
             // Check if bid exists
             Optional<Bid> bidOpt = bidRepository.findById(id);
             if (!bidOpt.isPresent()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Bid not found");
+                return ApiResponse.notFound("Bid not found");
             }
 
             // Check if tourist exists
             Optional<User> touristOpt = userRepository.findById(touristId);
             if (!touristOpt.isPresent()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tourist not found");
+                return ApiResponse.notFound("Tourist not found");
             }
 
             Bid bid = bidOpt.get();
 
             // Bid must be PENDING to be selected
             if (!bid.getStatus().equals("PENDING")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bid is not available");
+                return ApiResponse.badRequest("Bid is not available");
             }
 
             // Accept the bid
             bid.setStatus("ACCEPTED");
-            bidRepository.save(bid);
-            return ResponseEntity.ok("Bid selected");
+            Bid selectedBid = bidRepository.save(bid);
+            return ApiResponse.ok("Bid selected successfully", selectedBid);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            return ApiResponse.internalServerError("Failed to select bid: " + e.getMessage());
+        }
+    }
+
+    // Update an existing bid
+    public ResponseEntity<?> updateBid(int id, int driverId, Bid updatedBid) {
+        try {
+            // Check if bid exists
+            Optional<Bid> bidOpt = bidRepository.findById(id);
+            if (!bidOpt.isPresent()) {
+                return ApiResponse.notFound("Bid not found");
+            }
+
+            Bid bid = bidOpt.get();
+
+            // Verify the driver owns this bid
+            if (bid.getDriver().getUserId() != driverId) {
+                return ApiResponse.forbidden("You are not authorized to update this bid");
+            }
+
+            // Only PENDING bids can be updated
+            if (!bid.getStatus().equals("PENDING")) {
+                return ApiResponse.badRequest("Only pending bids can be updated");
+            }
+
+            // Update bid amount
+            bid.setAmount(updatedBid.getAmount());
+            Bid updated = bidRepository.save(bid);
+            return ApiResponse.ok("Bid updated successfully", updated);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to update bid: " + e.getMessage());
         }
     }
 }

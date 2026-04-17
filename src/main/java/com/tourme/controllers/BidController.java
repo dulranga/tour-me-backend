@@ -30,7 +30,11 @@ public class BidController {
     @PostMapping
     public ResponseEntity<?> submitBid(@RequestParam int driverId, @RequestParam int itineraryId,
             @RequestBody Bid bid) {
-        return bidService.submitBid(driverId, itineraryId, bid);
+        try {
+            return bidService.submitBid(driverId, itineraryId, bid);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to submit bid: " + e.getMessage());
+        }
     }
 
     /**
@@ -67,11 +71,7 @@ public class BidController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getBidById(@PathVariable int id) {
-        ResponseEntity<Bid> response = bidService.getBidById(id);
-        if (response.getStatusCode().value() == 200) {
-            return ApiResponse.ok("Bid retrieved successfully", response.getBody());
-        }
-        return ApiResponse.notFound("Bid not found");
+        return bidService.getBidById(id);
     }
 
     /**
@@ -84,6 +84,28 @@ public class BidController {
      */
     @PostMapping("/{id}/select")
     public ResponseEntity<?> selectBid(@PathVariable int id, @RequestParam int touristId) {
-        return bidService.selectBid(id, touristId);
+        try {
+            return bidService.selectBid(id, touristId);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to select bid: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Update an existing bid submitted by a driver.
+     * Only PENDING bids can be updated.
+     * 
+     * @param id       - The ID of the bid to update
+     * @param driverId - The ID of the driver (must be the bid owner)
+     * @param bid      - Updated bid details (amount)
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBid(@PathVariable int id, @RequestParam int driverId,
+            @RequestBody com.tourme.models.Bid bid) {
+        try {
+            return bidService.updateBid(id, driverId, bid);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to update bid: " + e.getMessage());
+        }
     }
 }

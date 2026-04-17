@@ -1,5 +1,6 @@
 package com.tourme.services;
 
+import com.tourme.dto.ApiResponse;
 import com.tourme.models.Itinerary;
 import com.tourme.models.Tourist;
 import com.tourme.models.User;
@@ -29,12 +30,12 @@ public class ItineraryService {
         Optional<User> userOptional = userRepository.findById(touristId);
 
         if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("Error: Tourist with ID " + touristId + " not found.");
+            return ApiResponse.badRequest("Error: Tourist with ID " + touristId + " not found.");
         }
 
         User user = userOptional.get();
         if (!(user instanceof Tourist)) {
-            return ResponseEntity.badRequest().body("Error: User with ID " + touristId + " is not a tourist.");
+            return ApiResponse.badRequest("Error: User with ID " + touristId + " is not a tourist.");
         }
 
         Tourist tourist = (Tourist) user;
@@ -42,7 +43,7 @@ public class ItineraryService {
         itinerary.setStatus("PENDING"); // Initial status before bidding starts
 
         Itinerary savedItinerary = itineraryRepository.save(itinerary);
-        return ResponseEntity.ok(savedItinerary);
+        return ApiResponse.created("Itinerary created successfully", savedItinerary);
     }
 
     /**
@@ -55,12 +56,12 @@ public class ItineraryService {
     /**
      * Get info for one trip by its ID.
      */
-    public ResponseEntity<Itinerary> getItineraryById(int id) {
+    public ResponseEntity<?> getItineraryById(int id) {
         Optional<Itinerary> itineraryOptional = itineraryRepository.findById(id);
         if (itineraryOptional.isPresent()) {
-            return ResponseEntity.ok(itineraryOptional.get());
+            return ApiResponse.ok("Itinerary retrieved successfully", itineraryOptional.get());
         } else {
-            return ResponseEntity.notFound().build();
+            return ApiResponse.notFound("Itinerary not found");
         }
     }
 
@@ -79,10 +80,10 @@ public class ItineraryService {
         if (itineraryOptional.isPresent()) {
             Itinerary itinerary = itineraryOptional.get();
             itinerary.setStatus("CANCELLED");
-            itineraryRepository.save(itinerary);
-            return ResponseEntity.ok("Itinerary has been successfully cancelled.");
+            Itinerary cancelledItinerary = itineraryRepository.save(itinerary);
+            return ApiResponse.ok("Itinerary cancelled successfully", cancelledItinerary);
         } else {
-            return ResponseEntity.notFound().build();
+            return ApiResponse.notFound("Itinerary not found");
         }
     }
 }
