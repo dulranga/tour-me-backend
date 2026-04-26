@@ -1,5 +1,6 @@
 package com.tourme.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -20,9 +21,11 @@ public class Itinerary {
     private Tourist tourist;
 
     @OneToMany(mappedBy = "itinerary", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Bid> bids;
 
-    public Itinerary() {}
+    public Itinerary() {
+    }
 
     public Itinerary(String pickupLocation, String destination, Tourist tourist) {
         this.pickupLocation = pickupLocation;

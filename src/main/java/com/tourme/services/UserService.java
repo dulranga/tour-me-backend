@@ -40,7 +40,8 @@ public class UserService {
     public Driver registerDriver(Driver driver) {
         String password = driver.getPasswordHash();
         driver.setPasswordHash(passwordEncoder.encode(password));
-
+        System.out.println(password);
+        System.out.println(passwordEncoder.encode(password));
         return userRepository.save(driver);
     }
 

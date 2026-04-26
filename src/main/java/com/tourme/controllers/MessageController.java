@@ -1,7 +1,9 @@
 package com.tourme.controllers;
 
+import com.tourme.annotations.AuthenticatedUser;
 import com.tourme.dto.ApiResponse;
 import com.tourme.models.Message;
+import com.tourme.services.AuthorizationService;
 import com.tourme.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,9 @@ public class MessageController {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
     /**
      * Send a message from one user to another
      * 
@@ -24,7 +29,7 @@ public class MessageController {
      * @param messageData - JSON object containing "content" field
      */
     @PostMapping("/send")
-    public ResponseEntity<?> sendMessage(@RequestParam int senderId, @RequestParam int receiverId,
+    public ResponseEntity<?> sendMessage(@AuthenticatedUser int senderId, @RequestParam int receiverId,
             @RequestBody Map<String, String> messageData) {
         try {
             String content = messageData.get("content");
@@ -41,9 +46,9 @@ public class MessageController {
      * @param userId2 - Second user ID
      */
     @GetMapping("/conversation")
-    public ResponseEntity<?> getMessages(@RequestParam int userId1, @RequestParam int userId2) {
+    public ResponseEntity<?> getMessages(@AuthenticatedUser int currentUserId, @RequestParam int otherUserId) {
         try {
-            return messageService.getMessages(userId1, userId2);
+            return messageService.getMessages(currentUserId, otherUserId);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to retrieve messages: " + e.getMessage());
         }
@@ -55,8 +60,9 @@ public class MessageController {
      * @param userId - The user ID
      */
     @GetMapping("/incoming/{userId}")
-    public ResponseEntity<?> getIncomingMessages(@PathVariable int userId) {
+    public ResponseEntity<?> getIncomingMessages(@PathVariable int userId, @AuthenticatedUser int authenticatedUserId) {
         try {
+            authorizationService.validateUserAccess(userId, authenticatedUserId);
             return messageService.getIncomingMessages(userId);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to retrieve incoming messages: " + e.getMessage());

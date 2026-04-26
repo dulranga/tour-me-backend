@@ -1,6 +1,7 @@
 package com.tourme.services;
 
 import com.tourme.dto.ApiResponse;
+import com.tourme.dto.BidSubmitRequest;
 import com.tourme.models.Bid;
 import com.tourme.models.Driver;
 import com.tourme.models.Itinerary;
@@ -9,7 +10,6 @@ import com.tourme.repositories.BidRepository;
 import com.tourme.repositories.ItineraryRepository;
 import com.tourme.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +29,7 @@ public class BidService {
     private ItineraryRepository itineraryRepository;
 
     // Create a new bid
-    public ResponseEntity<?> submitBid(int driverId, int itineraryId, Bid bid) {
+    public ResponseEntity<?> submitBid(int driverId, BidSubmitRequest bidRequest) {
         try {
             // Check if driver exists
             Optional<User> driverOpt = userRepository.findById(driverId);
@@ -38,12 +38,14 @@ public class BidService {
             }
 
             // Check if itinerary exists
-            Optional<Itinerary> itineraryOpt = itineraryRepository.findById(itineraryId);
+            Optional<Itinerary> itineraryOpt = itineraryRepository.findById(bidRequest.getItineraryId());
             if (!itineraryOpt.isPresent()) {
                 return ApiResponse.notFound("Itinerary not found");
             }
 
-            // Set bid details
+            // Create bid from request data
+            Bid bid = new Bid();
+            bid.setAmount(bidRequest.getBidAmount());
             bid.setDriver((Driver) driverOpt.get());
             bid.setItinerary(itineraryOpt.get());
             bid.setStatus("PENDING");

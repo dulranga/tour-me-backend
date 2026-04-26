@@ -12,13 +12,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tourme.annotations.AuthenticatedUser;
 import com.tourme.dto.ApiResponse;
+import com.tourme.dto.DriverRegisterRequest;
 import com.tourme.dto.UserRegisterRequest;
 import com.tourme.exceptions.UserNotFoundException;
 import com.tourme.models.Administrator;
 import com.tourme.models.Driver;
 import com.tourme.models.Tourist;
 import com.tourme.models.User;
+import com.tourme.services.AuthorizationService;
 import com.tourme.services.UserService;
 
 @RestController
@@ -27,6 +30,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AuthorizationService authorizationService;
 
     /**
      * Get all users in the system (Tourists, Drivers, and Administrators)
@@ -73,21 +79,15 @@ public class UserController {
      * class and call the service to save the driver in the database.
      */
     @PostMapping("/register/driver")
-    public ResponseEntity<?> registerDriver(@RequestBody Driver driver) {
-        Driver registeredDriver = userService.registerDriver(driver);
+    public ResponseEntity<?> registerDriver(@RequestBody DriverRegisterRequest data) {
+        Driver d = new Driver();
+        d.setName(data.name);
+        d.setEmail(data.email);
+        d.setPasswordHash(data.password);
+        d.setLicenseNumber(data.licenseNumber);
+        d.setVehicleDetails(data.vehicleDetails);
+        Driver registeredDriver = userService.registerDriver(d);
         return ApiResponse.ok("Driver registered successfully", registeredDriver);
-    }
-
-    /**
-     * Register a new Administrator
-     * admin first comes as .json object then we create a object of relevant class
-     * and
-     * call the service to save the admin in the database.
-     */
-    @PostMapping("/register/admin")
-    public ResponseEntity<?> registerAdmin(@RequestBody Administrator admin) {
-        Administrator registeredAdmin = userService.registerAdmin(admin);
-        return ApiResponse.ok("Administrator registered successfully", registeredAdmin);
     }
 
     /**
@@ -95,12 +95,16 @@ public class UserController {
      * call the service to update the user's profile.
      */
     @PutMapping("/{id}/profile")
-    public ResponseEntity<?> updateProfile(@PathVariable int id, @RequestBody User profileData) {
+    public ResponseEntity<?> updateProfile(@PathVariable int id, @AuthenticatedUser int authenticatedUserId,
+            @RequestBody User profileData) {
         try {
+            authorizationService.validateUserAccess(id, authenticatedUserId);
             User updatedUser = userService.updateProfile(id, profileData);
             return ApiResponse.ok("Profile updated successfully", updatedUser);
         } catch (UserNotFoundException e) {
             return ApiResponse.notFound("User not found");
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
         }
     }
 
@@ -109,15 +113,18 @@ public class UserController {
      * call the service to update the driver's vehicle details.
      */
     @PutMapping("/{id}/vehicle")
-    public ResponseEntity<?> updateVehicleDetails(@PathVariable int id,
+    public ResponseEntity<?> updateVehicleDetails(@PathVariable int id, @AuthenticatedUser int authenticatedUserId,
             @RequestBody String vehicleDetails) {
         try {
+            authorizationService.validateUserAccess(id, authenticatedUserId);
             Driver updatedDriver = userService.updateVehicleDetails(id, vehicleDetails);
             return ApiResponse.ok("Vehicle details updated successfully", updatedDriver);
         } catch (UserNotFoundException e) {
             return ApiResponse.notFound("User not found");
         } catch (IllegalArgumentException e) {
             return ApiResponse.badRequest(e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
         }
     }
 

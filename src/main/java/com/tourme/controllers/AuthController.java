@@ -69,6 +69,7 @@ public class AuthController {
 
             Map<String, String> responseData = new HashMap<>();
             responseData.put("userId", String.valueOf(u.getUserId()));
+            responseData.put("role", String.valueOf(u.getRole()));
             responseData.put("accessToken", accessToken);
             responseData.put("refreshToken", refreshToken);
 
@@ -91,7 +92,7 @@ public class AuthController {
      * the token to log the user out.
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody Map<String, String> logoutRequest,
+    public ResponseEntity<?> logout(
             HttpServletResponse response) {
 
         // Clear the access token cookie

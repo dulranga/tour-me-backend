@@ -1,7 +1,10 @@
 package com.tourme.controllers;
 
+import com.tourme.annotations.AuthenticatedUser;
 import com.tourme.dto.ApiResponse;
+import com.tourme.dto.BidSubmitRequest;
 import com.tourme.models.Bid;
+import com.tourme.services.AuthorizationService;
 import com.tourme.services.BidService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,23 +18,23 @@ public class BidController {
     @Autowired
     private BidService bidService;
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
     /**
      * Submit a new bid for an itinerary by a driver.
      * 
-     * @param driverId    - The ID of the driver placing the bid, used as a foreign
-     *                    key
-     * @param itineraryId - The ID of the itinerary the bid is for, used as a
-     *                    foreign key
-     * @param bid         - The bid details. this is json file which we convert to
-     *                    object of bid class and then pass it to service.
-     *                    call the service to submit a new bid for the specified
-     *                    itinerary by the specified driver.
+     * @param driverId   - The ID of the driver placing the bid, extracted from auth
+     *                   token
+     * @param bidRequest - The bid details containing itineraryId and bidAmount.
+     *                   call the service to submit a new bid for the specified
+     *                   itinerary by the specified driver.
      */
     @PostMapping
-    public ResponseEntity<?> submitBid(@RequestParam int driverId, @RequestParam int itineraryId,
-            @RequestBody Bid bid) {
+    public ResponseEntity<?> submitBid(@AuthenticatedUser int driverId,
+            @RequestBody BidSubmitRequest bidRequest) {
         try {
-            return bidService.submitBid(driverId, itineraryId, bid);
+            return bidService.submitBid(driverId, bidRequest);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to submit bid: " + e.getMessage());
         }
@@ -83,7 +86,7 @@ public class BidController {
      *                  and the tourist's user ID.
      */
     @PostMapping("/{id}/select")
-    public ResponseEntity<?> selectBid(@PathVariable int id, @RequestParam int touristId) {
+    public ResponseEntity<?> selectBid(@PathVariable int id, @AuthenticatedUser int touristId) {
         try {
             return bidService.selectBid(id, touristId);
         } catch (Exception e) {
@@ -100,9 +103,10 @@ public class BidController {
      * @param bid      - Updated bid details (amount)
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateBid(@PathVariable int id, @RequestParam int driverId,
+    public ResponseEntity<?> updateBid(@PathVariable int id, @AuthenticatedUser int driverId,
             @RequestBody com.tourme.models.Bid bid) {
         try {
+            authorizationService.validateBidOwnership(id, driverId);
             return bidService.updateBid(id, driverId, bid);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to update bid: " + e.getMessage());

@@ -1,5 +1,6 @@
 package com.tourme.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,13 +16,15 @@ public class Bid {
 
     @ManyToOne
     @JoinColumn(name = "itinerary_id")
+    @JsonBackReference
     private Itinerary itinerary;
 
     @ManyToOne
     @JoinColumn(name = "driver_id")
     private Driver driver;
 
-    public Bid() {}
+    public Bid() {
+    }
 
     public Bid(double amount, Itinerary itinerary, Driver driver) {
         this.amount = amount;
@@ -29,7 +32,7 @@ public class Bid {
         this.driver = driver;
         this.status = "PENDING";
     }
- 
+
     public int getBidId() {
         return bidId;
     }

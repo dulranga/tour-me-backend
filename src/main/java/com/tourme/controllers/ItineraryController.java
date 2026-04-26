@@ -1,11 +1,13 @@
 package com.tourme.controllers;
 
+import com.tourme.annotations.AuthenticatedUser;
 import com.tourme.dto.ApiResponse;
 import com.tourme.models.Itinerary;
 import com.tourme.models.Tourist;
 import com.tourme.models.User;
 import com.tourme.repositories.ItineraryRepository;
 import com.tourme.repositories.UserRepository;
+import com.tourme.services.AuthorizationService;
 import com.tourme.services.ItineraryService;
 import com.tourme.services.ReceiptService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class ItineraryController {
     @Autowired
     private ReceiptService receiptService;
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
     /**
      * Create a new itinerary for a specific tourist
      * 
@@ -43,7 +48,7 @@ public class ItineraryController {
      *                  tourist.
      */
     @PostMapping
-    public ResponseEntity<?> createItinerary(@RequestParam int touristId, @RequestBody Itinerary itinerary) {
+    public ResponseEntity<?> createItinerary(@AuthenticatedUser int touristId, @RequestBody Itinerary itinerary) {
         try {
             return itineraryService.createItinerary(touristId, itinerary);
         } catch (Exception e) {
@@ -95,8 +100,9 @@ public class ItineraryController {
      *           call the service to cancel an itinerary by its ID.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> cancelItinerary(@PathVariable int id) {
+    public ResponseEntity<?> cancelItinerary(@PathVariable int id, @AuthenticatedUser int touristId) {
         try {
+            authorizationService.validateItineraryOwnership(id, touristId);
             return itineraryService.cancelItinerary(id);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to cancel itinerary: " + e.getMessage());
