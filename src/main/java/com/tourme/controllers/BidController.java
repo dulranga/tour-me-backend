@@ -113,6 +113,22 @@ public class BidController {
     }
 
     /**
+     * Get all bids for all itineraries owned by the authenticated tourist.
+     * 
+     * @param touristId - The ID of the authenticated tourist
+     */
+    @GetMapping("/my-bids")
+    public ResponseEntity<?> getBidsForTourist(@AuthenticatedUser int touristId) {
+        try {
+            authorizationService.validateUserRole(touristId, "TOURIST");
+            List<Bid> bids = bidService.getBidsForTourist(touristId);
+            return ApiResponse.ok("Tourist bids retrieved successfully", bids);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to retrieve tourist bids: " + e.getMessage());
+        }
+    }
+
+    /**
      * Update an existing bid submitted by a driver.
      * Only PENDING bids can be updated.
      * 

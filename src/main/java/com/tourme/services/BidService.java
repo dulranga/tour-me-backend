@@ -74,6 +74,11 @@ public class BidService {
         return bidRepository.findByDriver_UserId(driverId);
     }
 
+    // Get all bids for all itineraries owned by a tourist
+    public List<Bid> getBidsForTourist(int touristId) {
+        return bidRepository.findByItinerary_Tourist_UserId(touristId);
+    }
+
     // Get a bid by ID
     public ResponseEntity<?> getBidById(int id) {
         Optional<Bid> bid = bidRepository.findById(id);

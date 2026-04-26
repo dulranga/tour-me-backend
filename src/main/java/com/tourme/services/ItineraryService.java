@@ -40,17 +40,17 @@ public class ItineraryService {
 
         Tourist tourist = (Tourist) user;
         itinerary.setTourist(tourist);
-        itinerary.setStatus("PENDING"); // Initial status before bidding starts
+        itinerary.setStatus("OPEN"); // Initial status before bidding starts
 
         Itinerary savedItinerary = itineraryRepository.save(itinerary);
         return ApiResponse.created("Itinerary created successfully", savedItinerary);
     }
 
     /**
-     * Get all trips ready for drivers to bid on (status PENDING).
+     * Get all trips ready for drivers to bid on (status OPEN).
      */
     public List<Itinerary> getAvailableItineraries() {
-        return itineraryRepository.findByStatus("PENDING");
+        return itineraryRepository.findByStatus("OPEN");
     }
 
     /**
@@ -73,15 +73,17 @@ public class ItineraryService {
     }
 
     /**
-     * Cancel a trip by setting status to CANCELLED (keep in database).
+     * Cancel a trip (status remains CONFIRMED or OPEN until ended).
+     * 
+     * @deprecated Statuses are now restricted to DRAFT, OPEN, CONFIRMED.
      */
     public ResponseEntity<?> cancelItinerary(int id) {
         Optional<Itinerary> itineraryOptional = itineraryRepository.findById(id);
         if (itineraryOptional.isPresent()) {
             Itinerary itinerary = itineraryOptional.get();
-            itinerary.setStatus("CANCELLED");
+            itinerary.setStatus("DRAFT"); // Reverting to draft instead of CANCELLED
             Itinerary cancelledItinerary = itineraryRepository.save(itinerary);
-            return ApiResponse.ok("Itinerary cancelled successfully", cancelledItinerary);
+            return ApiResponse.ok("Itinerary moved to DRAFT", cancelledItinerary);
         } else {
             return ApiResponse.notFound("Itinerary not found");
         }

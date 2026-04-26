@@ -9,5 +9,8 @@ import java.util.List;
 @Repository
 public interface BidRepository extends JpaRepository<Bid, Integer> {
     List<Bid> findByItinerary_ItineraryId(int itineraryId);
+
     List<Bid> findByDriver_UserId(int userId);
+
+    List<Bid> findByItinerary_Tourist_UserId(int userId);
 }
