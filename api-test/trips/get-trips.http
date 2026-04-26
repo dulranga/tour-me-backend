@@ -1,0 +1,11 @@
+### Get all trips (Admin)
+GET {{baseUrl}}/api/trips
+Authorization: Bearer {{adminToken}}
+
+### Get driver's upcoming trips
+GET {{baseUrl}}/api/trips/driver/{{driverId}}
+Authorization: Bearer {{driverToken}}
+
+### Get tourist's confirmed trips
+GET {{baseUrl}}/api/trips/tourist/{{touristId}}
+Authorization: Bearer {{touristToken}}
