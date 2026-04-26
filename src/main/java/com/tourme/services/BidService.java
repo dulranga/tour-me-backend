@@ -43,11 +43,18 @@ public class BidService {
                 return ApiResponse.notFound("Itinerary not found");
             }
 
+            Itinerary itinerary = itineraryOpt.get();
+
+            // Guard: Itinerary must be OPEN for bidding
+            if (!"OPEN".equals(itinerary.getStatus())) {
+                return ApiResponse.badRequest("Bidding is closed for this itinerary");
+            }
+
             // Create bid from request data
             Bid bid = new Bid();
             bid.setAmount(bidRequest.getBidAmount());
             bid.setDriver((Driver) driverOpt.get());
-            bid.setItinerary(itineraryOpt.get());
+            bid.setItinerary(itinerary);
             bid.setStatus("PENDING");
 
             // Save and return
@@ -85,21 +92,30 @@ public class BidService {
                 return ApiResponse.notFound("Bid not found");
             }
 
-            // Check if tourist exists
-            Optional<User> touristOpt = userRepository.findById(touristId);
-            if (!touristOpt.isPresent()) {
-                return ApiResponse.notFound("Tourist not found");
-            }
-
             Bid bid = bidOpt.get();
+            Itinerary itinerary = bid.getItinerary();
+
+            // Guard: Must be the owner of the itinerary to select a bid
+            if (itinerary == null || itinerary.getTourist() == null ||
+                    itinerary.getTourist().getUserId() != touristId) {
+                return ApiResponse.forbidden("You are not the owner of this itinerary");
+            }
 
             // Bid must be PENDING to be selected
             if (!bid.getStatus().equals("PENDING")) {
                 return ApiResponse.badRequest("Bid is not available");
             }
 
+            // Itinerary must be OPEN
+            if (!itinerary.getStatus().equals("OPEN")) {
+                return ApiResponse.badRequest("Itinerary is not open for selection");
+            }
+
             // Accept the bid
             bid.setStatus("ACCEPTED");
+            itinerary.setStatus("CONFIRMED");
+            itineraryRepository.save(itinerary);
+
             Bid selectedBid = bidRepository.save(bid);
             return ApiResponse.ok("Bid selected successfully", selectedBid);
         } catch (Exception e) {

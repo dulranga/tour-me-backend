@@ -18,7 +18,8 @@ import io.jsonwebtoken.security.Keys;
 
 /**
  * Helper class for authentication-related operations
- * Provides utilities to validate JWT tokens, extract user information, and check authentication status
+ * Provides utilities to validate JWT tokens, extract user information, and
+ * check authentication status
  */
 @Component
 public class AuthenticationHelper {
@@ -40,13 +41,13 @@ public class AuthenticationHelper {
             if (token == null || token.isEmpty()) {
                 return false;
             }
-            
+
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
             Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
-            
+
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -64,13 +65,13 @@ public class AuthenticationHelper {
             if (!isTokenValid(token)) {
                 return null;
             }
-            
+
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
             Jws<Claims> jws = Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
-            
+
             String userId = jws.getPayload().getSubject();
             return Integer.parseInt(userId);
         } catch (Exception e) {
@@ -89,13 +90,13 @@ public class AuthenticationHelper {
             if (!isTokenValid(token)) {
                 return null;
             }
-            
+
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
             Jws<Claims> jws = Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
-            
+
             return jws.getPayload().get("email", String.class);
         } catch (Exception e) {
             return null;
@@ -103,7 +104,8 @@ public class AuthenticationHelper {
     }
 
     /**
-     * Checks if a user is authenticated by validating their token and verifying they exist in the database
+     * Checks if a user is authenticated by validating their token and verifying
+     * they exist in the database
      * 
      * @param token The JWT token to validate
      * @return true if the user is authenticated, false otherwise
@@ -114,7 +116,7 @@ public class AuthenticationHelper {
             if (userId == null) {
                 return false;
             }
-            
+
             // Check if user exists in database
             return userRepository.findById(userId).isPresent();
         } catch (Exception e) {
@@ -134,7 +136,7 @@ public class AuthenticationHelper {
         if (userId == null) {
             throw new UserNotFoundException();
         }
-        
+
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException());
     }
@@ -152,7 +154,7 @@ public class AuthenticationHelper {
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
-            
+
             String type = jws.getPayload().get("type", String.class);
             return "refresh".equals(type);
         } catch (Exception e) {

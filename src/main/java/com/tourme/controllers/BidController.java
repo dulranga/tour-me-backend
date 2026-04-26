@@ -34,6 +34,7 @@ public class BidController {
     public ResponseEntity<?> submitBid(@AuthenticatedUser int driverId,
             @RequestBody BidSubmitRequest bidRequest) {
         try {
+            authorizationService.validateUserRole(driverId, "DRIVER");
             return bidService.submitBid(driverId, bidRequest);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to submit bid: " + e.getMessage());
@@ -48,9 +49,14 @@ public class BidController {
      *                    itinerary using its ID.
      */
     @GetMapping("/itinerary/{itineraryId}")
-    public ResponseEntity<?> getBidsForItinerary(@PathVariable int itineraryId) {
-        List<Bid> bids = bidService.getBidsForItinerary(itineraryId);
-        return ApiResponse.ok("Bids retrieved successfully", bids);
+    public ResponseEntity<?> getBidsForItinerary(@PathVariable int itineraryId, @AuthenticatedUser int authUserId) {
+        try {
+            authorizationService.validateItineraryBidReadAccess(itineraryId, authUserId);
+            List<Bid> bids = bidService.getBidsForItinerary(itineraryId);
+            return ApiResponse.ok("Bids retrieved successfully", bids);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to retrieve bids: " + e.getMessage());
+        }
     }
 
     /**
@@ -61,9 +67,14 @@ public class BidController {
      *                 driver using their user ID.
      */
     @GetMapping("/driver/{driverId}")
-    public ResponseEntity<?> getBidsForDriver(@PathVariable int driverId) {
-        List<Bid> bids = bidService.getBidsForDriver(driverId);
-        return ApiResponse.ok("Driver bids retrieved successfully", bids);
+    public ResponseEntity<?> getBidsForDriver(@PathVariable int driverId, @AuthenticatedUser int authUserId) {
+        try {
+            authorizationService.validateUserAccess(driverId, authUserId);
+            List<Bid> bids = bidService.getBidsForDriver(driverId);
+            return ApiResponse.ok("Driver bids retrieved successfully", bids);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to retrieve driver bids: " + e.getMessage());
+        }
     }
 
     /**
@@ -73,8 +84,13 @@ public class BidController {
      *           call the service to fetch the details of a specific bid by its ID.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getBidById(@PathVariable int id) {
-        return bidService.getBidById(id);
+    public ResponseEntity<?> getBidById(@PathVariable int id, @AuthenticatedUser int authUserId) {
+        try {
+            authorizationService.validateBidReadAccess(id, authUserId);
+            return bidService.getBidById(id);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError("Failed to retrieve bid: " + e.getMessage());
+        }
     }
 
     /**
@@ -88,6 +104,8 @@ public class BidController {
     @PostMapping("/{id}/select")
     public ResponseEntity<?> selectBid(@PathVariable int id, @AuthenticatedUser int touristId) {
         try {
+            authorizationService.validateUserRole(touristId, "TOURIST");
+            // selectBid in service performs internal ownership check via itineraryId
             return bidService.selectBid(id, touristId);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to select bid: " + e.getMessage());
