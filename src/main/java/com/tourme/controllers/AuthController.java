@@ -20,7 +20,10 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+// Marks this class as a REST API controller
 @RestController
+
+// Base URL for all authentication endpoints    
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -37,15 +40,23 @@ public class AuthController {
      * generate a JWT token and return it in the response.
      */
 
+    /*
+     * Handle user login request
+     * Validate user credentials and generate JWT tokens
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest,
             HttpServletResponse response) {
         try {
 
+              // Extract email and password from request body
             String email = loginRequest.get("email");
             String password = loginRequest.get("password");
+
+            // Authenticate user
             User u = authService.login(email, password);
 
+           // Generate access and refresh tokens
             String accessToken = authService.generateToken(u);
             String refreshToken = authService.generateRefreshToken(u);
 
@@ -67,17 +78,22 @@ public class AuthController {
             refreshTokenCookie.setAttribute("SameSite", "Strict");
             response.addCookie(refreshTokenCookie);
 
+            // Create response data
             Map<String, String> responseData = new HashMap<>();
             responseData.put("userId", String.valueOf(u.getUserId()));
             responseData.put("role", String.valueOf(u.getRole()));
             responseData.put("accessToken", accessToken);
             responseData.put("refreshToken", refreshToken);
 
+            // Return success response
             return ApiResponse.ok("Login successful", responseData);
         } catch (UserNotFoundException e) {
             return ApiResponse.notFound("User not found");
         } catch (Exception e) {
+            // Print server error message
             System.err.println("Error during login: " + e.getMessage());
+            
+           // Return internal server error response 
             return ApiResponse.internalServerError("Internal server error");
         }
     }
@@ -128,7 +144,9 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> refreshRequest,
             HttpServletResponse response) {
         try {
+            // Extract refresh token from request
             String refreshToken = refreshRequest.get("refreshToken");
+            // Generate new access token
             String newAccessToken = authService.generateTokenFromRefreshToken(refreshToken);
 
             // Update the access token cookie with new token
@@ -139,11 +157,14 @@ public class AuthController {
             accessTokenCookie.setMaxAge(24 * 60 * 60); // 24 hours
             response.addCookie(accessTokenCookie);
 
+            // Prepare response data
             Map<String, String> responseData = new HashMap<>();
             responseData.put("accessToken", newAccessToken);
 
+            // Return success response
             return ApiResponse.ok("Token refreshed successfully", responseData);
         } catch (Exception e) {
+            // Return unauthorized response if token is invalid
             return ApiResponse.unauthorized("Invalid or expired refresh token");
         }
     }
@@ -155,6 +176,10 @@ public class AuthController {
      * @param request - The HTTP request containing the Authorization cookie
      * 
      * @return The current user's information
+     */
+
+    /*
+     * Get currently authenticated user details
      */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
@@ -171,14 +196,19 @@ public class AuthController {
                 }
             }
 
+            // Check if token exists
             if (token == null) {
                 return ApiResponse.unauthorized("No authentication token found");
             }
 
+            // Get user from JWT token
             User currentUser = authService.getUserFromToken(token);
             return ApiResponse.ok("Current user retrieved successfully", currentUser);
+            // Return current user details
         } catch (UserNotFoundException e) {
             return ApiResponse.notFound("User not found");
+
+            // Return user not found response
         } catch (Exception e) {
             return ApiResponse.unauthorized("Invalid or expired token");
         }
