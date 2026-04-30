@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bids")
+// Controller for bid-related actions by drivers and tourists.
 public class BidController {
 
     @Autowired
@@ -31,6 +32,7 @@ public class BidController {
      *                   itinerary by the specified driver.
      */
     @PostMapping
+    // Driver sends a bid for a trip.
     public ResponseEntity<?> submitBid(@AuthenticatedUser int driverId,
             @RequestBody BidSubmitRequest bidRequest) {
         try {
@@ -49,6 +51,7 @@ public class BidController {
      *                    itinerary using its ID.
      */
     @GetMapping("/itinerary/{itineraryId}")
+    // Return bids placed on one itinerary.
     public ResponseEntity<?> getBidsForItinerary(@PathVariable int itineraryId, @AuthenticatedUser int authUserId) {
         try {
             authorizationService.validateItineraryBidReadAccess(itineraryId, authUserId);
@@ -67,6 +70,7 @@ public class BidController {
      *                 driver using their user ID.
      */
     @GetMapping("/driver/{driverId}")
+    // Return all bids made by a driver.
     public ResponseEntity<?> getBidsForDriver(@PathVariable int driverId, @AuthenticatedUser int authUserId) {
         try {
             authorizationService.validateUserAccess(driverId, authUserId);
@@ -84,6 +88,7 @@ public class BidController {
      *           call the service to fetch the details of a specific bid by its ID.
      */
     @GetMapping("/{id}")
+    // Return one bid by its ID.
     public ResponseEntity<?> getBidById(@PathVariable int id, @AuthenticatedUser int authUserId) {
         try {
             authorizationService.validateBidReadAccess(id, authUserId);
@@ -102,6 +107,7 @@ public class BidController {
      *                  and the tourist's user ID.
      */
     @PostMapping("/{id}/select")
+    // Tourist chooses a bid for their itinerary.
     public ResponseEntity<?> selectBid(@PathVariable int id, @AuthenticatedUser int touristId) {
         try {
             authorizationService.validateUserRole(touristId, "TOURIST");
@@ -118,6 +124,7 @@ public class BidController {
      * @param touristId - The ID of the authenticated tourist
      */
     @GetMapping("/my-bids")
+    // Show all bids for itineraries owned by the logged-in tourist.
     public ResponseEntity<?> getBidsForTourist(@AuthenticatedUser int touristId) {
         try {
             authorizationService.validateUserRole(touristId, "TOURIST");
@@ -137,6 +144,7 @@ public class BidController {
      * @param bid      - Updated bid details (amount)
      */
     @PutMapping("/{id}")
+    // Driver updates their own bid.
     public ResponseEntity<?> updateBid(@PathVariable int id, @AuthenticatedUser int driverId,
             @RequestBody com.tourme.models.Bid bid) {
         try {
