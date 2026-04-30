@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+// Simple service for bid actions.
 public class BidService {
 
     @Autowired
@@ -28,16 +29,16 @@ public class BidService {
     @Autowired
     private ItineraryRepository itineraryRepository;
 
-    // Create a new bid
+    // Driver makes a new bid
     public ResponseEntity<?> submitBid(int driverId, BidSubmitRequest bidRequest) {
         try {
-            // Check if driver exists
+            // Find the driver
             Optional<User> driverOpt = userRepository.findById(driverId);
             if (!driverOpt.isPresent() || !(driverOpt.get() instanceof Driver)) {
                 return ApiResponse.notFound("Driver not found");
             }
 
-            // Check if itinerary exists
+            // Find the trip
             Optional<Itinerary> itineraryOpt = itineraryRepository.findById(bidRequest.getItineraryId());
             if (!itineraryOpt.isPresent()) {
                 return ApiResponse.notFound("Itinerary not found");
@@ -45,41 +46,41 @@ public class BidService {
 
             Itinerary itinerary = itineraryOpt.get();
 
-            // Guard: Itinerary must be OPEN for bidding
+            // Only open trips can get bids
             if (!"OPEN".equals(itinerary.getStatus())) {
                 return ApiResponse.badRequest("Bidding is closed for this itinerary");
             }
 
-            // Create bid from request data
+            // Build the bid
             Bid bid = new Bid();
             bid.setAmount(bidRequest.getBidAmount());
             bid.setDriver((Driver) driverOpt.get());
             bid.setItinerary(itinerary);
             bid.setStatus("PENDING");
 
-            // Save and return
+            // Save bid and send back result
             return ApiResponse.created("Bid submitted successfully", bidRepository.save(bid));
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to submit bid: " + e.getMessage());
         }
     }
 
-    // Get all bids for an itinerary
+    // Get all bids for one trip
     public List<Bid> getBidsForItinerary(int itineraryId) {
         return bidRepository.findByItinerary_ItineraryId(itineraryId);
     }
 
-    // Get all bids from a driver
+    // Get all bids by one driver
     public List<Bid> getBidsForDriver(int driverId) {
         return bidRepository.findByDriver_UserId(driverId);
     }
 
-    // Get all bids for all itineraries owned by a tourist
+    // Get all bids for a tourist's trips
     public List<Bid> getBidsForTourist(int touristId) {
         return bidRepository.findByItinerary_Tourist_UserId(touristId);
     }
 
-    // Get a bid by ID
+    // Get one bid by its ID
     public ResponseEntity<?> getBidById(int id) {
         Optional<Bid> bid = bidRepository.findById(id);
         if (bid.isPresent()) {
@@ -88,10 +89,10 @@ public class BidService {
         return ApiResponse.notFound("Bid not found");
     }
 
-    // Tourist selects a bid
+    // Tourist picks a bid
     public ResponseEntity<?> selectBid(int id, int touristId) {
         try {
-            // Check if bid exists
+            // Find the bid
             Optional<Bid> bidOpt = bidRepository.findById(id);
             if (!bidOpt.isPresent()) {
                 return ApiResponse.notFound("Bid not found");
@@ -100,23 +101,23 @@ public class BidService {
             Bid bid = bidOpt.get();
             Itinerary itinerary = bid.getItinerary();
 
-            // Guard: Must be the owner of the itinerary to select a bid
+            // Only the trip owner can choose a bid
             if (itinerary == null || itinerary.getTourist() == null ||
                     itinerary.getTourist().getUserId() != touristId) {
                 return ApiResponse.forbidden("You are not the owner of this itinerary");
             }
 
-            // Bid must be PENDING to be selected
+            // Only pending bids can be chosen
             if (!bid.getStatus().equals("PENDING")) {
                 return ApiResponse.badRequest("Bid is not available");
             }
 
-            // Itinerary must be OPEN
+            // Trip must still be open
             if (!itinerary.getStatus().equals("OPEN")) {
                 return ApiResponse.badRequest("Itinerary is not open for selection");
             }
 
-            // Accept the bid
+            // Mark bid accepted and confirm trip
             bid.setStatus("ACCEPTED");
             itinerary.setStatus("CONFIRMED");
             itineraryRepository.save(itinerary);
@@ -128,10 +129,10 @@ public class BidService {
         }
     }
 
-    // Update an existing bid
+    // Change a bid's amount
     public ResponseEntity<?> updateBid(int id, int driverId, Bid updatedBid) {
         try {
-            // Check if bid exists
+            // Find the bid
             Optional<Bid> bidOpt = bidRepository.findById(id);
             if (!bidOpt.isPresent()) {
                 return ApiResponse.notFound("Bid not found");
@@ -139,17 +140,17 @@ public class BidService {
 
             Bid bid = bidOpt.get();
 
-            // Verify the driver owns this bid
+            // Make sure the driver owns it
             if (bid.getDriver().getUserId() != driverId) {
                 return ApiResponse.forbidden("You are not authorized to update this bid");
             }
 
-            // Only PENDING bids can be updated
+            // Only pending bids can change
             if (!bid.getStatus().equals("PENDING")) {
                 return ApiResponse.badRequest("Only pending bids can be updated");
             }
 
-            // Update bid amount
+            // Save new amount
             bid.setAmount(updatedBid.getAmount());
             Bid updated = bidRepository.save(bid);
             return ApiResponse.ok("Bid updated successfully", updated);
