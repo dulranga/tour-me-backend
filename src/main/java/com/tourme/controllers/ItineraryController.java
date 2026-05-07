@@ -16,10 +16,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
+/**
+ * REST endpoint for managing itineraries.
+ * Handles creation, retrieval, cancellation, and receipt management.
+ */
 @RestController
 @RequestMapping("/api/itineraries")
 public class ItineraryController {
-
+    // Dependencies for data access and business logic
     @Autowired
     private ItineraryRepository itineraryRepository;
 
@@ -35,18 +39,7 @@ public class ItineraryController {
     @Autowired
     private AuthorizationService authorizationService;
 
-    /**
-     * Create a new itinerary for a specific tourist
-     * 
-     * @param touristId - The ID of the tourist creating the itinerary. this is the
-     *                  foreign key which we use to link the itinerary to the
-     *                  tourist in the database.
-     * @param itinerary - The itinerary details (pickup, destination, etc.) this is
-     *                  json file which we convert to object of itinerary class and
-     *                  then pass it to service.
-     *                  call the service to create a new itinerary for the specified
-     *                  tourist.
-     */
+    // Creates a new itinerary for the authenticated tourist
     @PostMapping
     public ResponseEntity<?> createItinerary(@AuthenticatedUser int touristId, @RequestBody Itinerary itinerary) {
         try {
@@ -56,49 +49,27 @@ public class ItineraryController {
         }
     }
 
-    /**
-     * Get all itineraries available for bidding
-     * call the service to fetch all itineraries that are currently available for
-     * drivers to bid on.
-     */
+    // Returns all itineraries available for driver bidding
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableItineraries() {
         List<Itinerary> itineraries = itineraryService.getAvailableItineraries();
         return ApiResponse.ok("Available itineraries retrieved successfully", itineraries);
     }
 
-    /**
-     * Get a specific itinerary's details by ID
-     * 
-     * @param id - The itinerary ID
-     *           call the service to fetch the details of a specific itinerary by
-     *           its ID.
-     */
+    // Retrieves a single itinerary by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getItineraryDetails(@PathVariable int id) {
         return itineraryService.getItineraryById(id);
     }
 
-    /**
-     * Get all itineraries created by a specific tourist
-     * 
-     * @param userId - The tourist's user ID
-     *               call the service to fetch all itineraries created by a specific
-     *               tourist using their user ID.
-     */
+    // Gets all itineraries created by a specific user
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserItineraries(@PathVariable int userId) {
         List<Itinerary> itineraries = itineraryService.getUserItineraries(userId);
         return ApiResponse.ok("User itineraries retrieved successfully", itineraries);
     }
 
-    /**
-     * Cancel an itinerary (soft delete - sets status to CANCELLED) does not delete
-     * the whole raw from the DB.
-     * 
-     * @param id - The itinerary ID to cancel
-     *           call the service to cancel an itinerary by its ID.
-     */
+    // Soft-deletes an itinerary (marks as CANCELLED, doesn't remove from DB)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> cancelItinerary(@PathVariable int id, @AuthenticatedUser int touristId) {
         try {
@@ -109,12 +80,7 @@ public class ItineraryController {
         }
     }
 
-    /**
-     * Upload a receipt for an itinerary
-     * 
-     * @param itineraryId - The ID of the itinerary
-     * @param file        - The receipt file to upload
-     */
+    // Uploads receipt file for an itinerary
     @PostMapping("/{itineraryId}/receipt")
     public ResponseEntity<?> uploadReceipt(@PathVariable int itineraryId,
             @RequestParam("file") MultipartFile file) {
@@ -125,11 +91,7 @@ public class ItineraryController {
         }
     }
 
-    /**
-     * Get receipt for an itinerary
-     * 
-     * @param itineraryId - The ID of the itinerary
-     */
+    // Retrieves receipt for an itinerary
     @GetMapping("/{itineraryId}/receipt")
     public ResponseEntity<?> getReceipt(@PathVariable int itineraryId) {
         try {
@@ -139,11 +101,7 @@ public class ItineraryController {
         }
     }
 
-    /**
-     * Delete receipt for an itinerary
-     * 
-     * @param itineraryId - The ID of the itinerary
-     */
+    // Deletes receipt associated with an itinerary
     @DeleteMapping("/{itineraryId}/receipt")
     public ResponseEntity<?> deleteReceipt(@PathVariable int itineraryId) {
         try {
