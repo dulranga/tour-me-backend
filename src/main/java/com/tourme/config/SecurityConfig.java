@@ -20,7 +20,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:8012")
+                        .allowedOrigins("http://localhost:8012", "https://tourme.dulranga.dev")
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true)

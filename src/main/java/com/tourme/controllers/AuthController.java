@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
 // Marks this class as a REST API controller
 @RestController
 
-// Base URL for all authentication endpoints    
+// Base URL for all authentication endpoints
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -49,14 +49,14 @@ public class AuthController {
             HttpServletResponse response) {
         try {
 
-              // Extract email and password from request body
+            // Extract email and password from request body
             String email = loginRequest.get("email");
             String password = loginRequest.get("password");
 
             // Authenticate user
             User u = authService.login(email, password);
 
-           // Generate access and refresh tokens
+            // Generate access and refresh tokens
             String accessToken = authService.generateToken(u);
             String refreshToken = authService.generateRefreshToken(u);
 
@@ -92,8 +92,8 @@ public class AuthController {
         } catch (Exception e) {
             // Print server error message
             System.err.println("Error during login: " + e.getMessage());
-            
-           // Return internal server error response 
+
+            // Return internal server error response
             return ApiResponse.internalServerError("Internal server error");
         }
     }

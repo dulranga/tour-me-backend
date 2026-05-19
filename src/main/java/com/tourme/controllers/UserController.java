@@ -40,8 +40,12 @@ public class UserController {
      */
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ApiResponse.ok("Users retrieved successfully", users);
+        try {
+            List<User> users = userService.getAllUsers();
+            return ApiResponse.ok("Users retrieved successfully", users);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
+        }
     }
 
     /**
@@ -50,11 +54,16 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable int id) {
-        User u = userService.getUserById(id);
-        if (u != null) {
-            return ApiResponse.ok("User retrieved successfully", u);
-        } else {
+        try {
+            User u = userService.getUserById(id);
+            if (u != null) {
+                return ApiResponse.ok("User retrieved successfully", u);
+            }
             return ApiResponse.notFound("User not found");
+        } catch (UserNotFoundException e) {
+            return ApiResponse.notFound("User not found");
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
         }
     }
 
@@ -65,12 +74,18 @@ public class UserController {
      */
     @PostMapping("/register/tourist")
     public ResponseEntity<?> registerTourist(@RequestBody UserRegisterRequest data) {
-        Tourist t = new Tourist();
-        t.setName(data.name);
-        t.setEmail(data.email);
-        t.setPasswordHash(data.password);
-        Tourist registeredTourist = userService.registerTourist(t);
-        return ApiResponse.ok("Tourist registered successfully", registeredTourist);
+        try {
+            Tourist t = new Tourist();
+            t.setName(data.name);
+            t.setEmail(data.email);
+            t.setPasswordHash(data.password);
+            Tourist registeredTourist = userService.registerTourist(t);
+            return ApiResponse.ok("Tourist registered successfully", registeredTourist);
+        } catch (IllegalArgumentException e) {
+            return ApiResponse.badRequest(e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
+        }
     }
 
     /**
@@ -80,14 +95,20 @@ public class UserController {
      */
     @PostMapping("/register/driver")
     public ResponseEntity<?> registerDriver(@RequestBody DriverRegisterRequest data) {
-        Driver d = new Driver();
-        d.setName(data.name);
-        d.setEmail(data.email);
-        d.setPasswordHash(data.password);
-        d.setLicenseNumber(data.licenseNumber);
-        d.setVehicleDetails(data.vehicleDetails);
-        Driver registeredDriver = userService.registerDriver(d);
-        return ApiResponse.ok("Driver registered successfully", registeredDriver);
+        try {
+            Driver d = new Driver();
+            d.setName(data.name);
+            d.setEmail(data.email);
+            d.setPasswordHash(data.password);
+            d.setLicenseNumber(data.licenseNumber);
+            d.setVehicleDetails(data.vehicleDetails);
+            Driver registeredDriver = userService.registerDriver(d);
+            return ApiResponse.ok("Driver registered successfully", registeredDriver);
+        } catch (IllegalArgumentException e) {
+            return ApiResponse.badRequest(e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
+        }
     }
 
     /**
@@ -134,8 +155,12 @@ public class UserController {
      */
     @GetMapping("/tourists")
     public ResponseEntity<?> getAllTourists() {
-        List<User> tourists = userService.getAllTourists();
-        return ApiResponse.ok("Tourists retrieved successfully", tourists);
+        try {
+            List<User> tourists = userService.getAllTourists();
+            return ApiResponse.ok("Tourists retrieved successfully", tourists);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
+        }
     }
 
     /**
@@ -144,8 +169,12 @@ public class UserController {
      */
     @GetMapping("/drivers")
     public ResponseEntity<?> getAllDrivers() {
-        List<User> drivers = userService.getAllDrivers();
-        return ApiResponse.ok("Drivers retrieved successfully", drivers);
+        try {
+            List<User> drivers = userService.getAllDrivers();
+            return ApiResponse.ok("Drivers retrieved successfully", drivers);
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
+        }
     }
 
     /**
@@ -153,6 +182,10 @@ public class UserController {
      */
     @GetMapping("/status")
     public ResponseEntity<?> getStatus() {
-        return ApiResponse.ok("Service is healthy", "TourMe service is running");
+        try {
+            return ApiResponse.ok("Service is healthy", "TourMe service is running");
+        } catch (Exception e) {
+            return ApiResponse.internalServerError(e.getMessage());
+        }
     }
 }
