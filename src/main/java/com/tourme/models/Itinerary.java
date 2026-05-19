@@ -14,6 +14,8 @@ public class Itinerary {
 
     private String pickupLocation;
     private String destination;
+    private Double estimatedDistance;
+    private Integer estimatedDuration;
     private String status; // "PENDING", "ACTIVE", "COMPLETED", "CANCELLED"
 
     @ManyToOne
@@ -54,6 +56,22 @@ public class Itinerary {
 
     public void setDestination(String destination) {
         this.destination = destination;
+    }
+
+    public Double getEstimatedDistance() {
+        return estimatedDistance;
+    }
+
+    public void setEstimatedDistance(Double estimatedDistance) {
+        this.estimatedDistance = estimatedDistance;
+    }
+
+    public Integer getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public void setEstimatedDuration(Integer estimatedDuration) {
+        this.estimatedDuration = estimatedDuration;
     }
 
     public String getStatus() {

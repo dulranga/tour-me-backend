@@ -13,6 +13,8 @@ public class TripDTO {
     private int itineraryId;
     private String pickupLocation;
     private String destination;
+    private Double estimatedDistance;
+    private Integer estimatedDuration;
     private String status;
     private double agreedPrice;
 
@@ -34,6 +36,8 @@ public class TripDTO {
             this.itineraryId = itinerary.getItineraryId();
             this.pickupLocation = itinerary.getPickupLocation();
             this.destination = itinerary.getDestination();
+            this.estimatedDistance = itinerary.getEstimatedDistance();
+            this.estimatedDuration = itinerary.getEstimatedDuration();
             this.status = itinerary.getStatus();
         }
 
@@ -77,6 +81,22 @@ public class TripDTO {
 
     public void setDestination(String destination) {
         this.destination = destination;
+    }
+
+    public Double getEstimatedDistance() {
+        return estimatedDistance;
+    }
+
+    public void setEstimatedDistance(Double estimatedDistance) {
+        this.estimatedDistance = estimatedDistance;
+    }
+
+    public Integer getEstimatedDuration() {
+        return estimatedDuration;
+    }
+
+    public void setEstimatedDuration(Integer estimatedDuration) {
+        this.estimatedDuration = estimatedDuration;
     }
 
     public String getStatus() {
