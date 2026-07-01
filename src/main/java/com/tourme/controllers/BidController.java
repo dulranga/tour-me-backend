@@ -3,6 +3,7 @@ package com.tourme.controllers;
 import com.tourme.annotations.AuthenticatedUser;
 import com.tourme.dto.ApiResponse;
 import com.tourme.dto.BidSubmitRequest;
+import com.tourme.dto.BidWithDriverDetailsDTO;
 import com.tourme.models.Bid;
 import com.tourme.services.AuthorizationService;
 import com.tourme.services.BidService;
@@ -120,15 +121,16 @@ public class BidController {
 
     /**
      * Get all bids for all itineraries owned by the authenticated tourist.
+     * Includes driver contact details with each bid.
      * 
      * @param touristId - The ID of the authenticated tourist
      */
     @GetMapping("/my-bids")
-    // Show all bids for itineraries owned by the logged-in tourist.
+    // Show all bids for itineraries owned by the logged-in tourist with driver contact details.
     public ResponseEntity<?> getBidsForTourist(@AuthenticatedUser int touristId) {
         try {
             authorizationService.validateUserRole(touristId, "TOURIST");
-            List<Bid> bids = bidService.getBidsForTourist(touristId);
+            List<BidWithDriverDetailsDTO> bids = bidService.getBidsForTouristWithDriverDetails(touristId);
             return ApiResponse.ok("Tourist bids retrieved successfully", bids);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to retrieve tourist bids: " + e.getMessage());

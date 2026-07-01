@@ -2,6 +2,7 @@ package com.tourme.services;
 
 import com.tourme.dto.ApiResponse;
 import com.tourme.dto.BidSubmitRequest;
+import com.tourme.dto.BidWithDriverDetailsDTO;
 import com.tourme.models.Bid;
 import com.tourme.models.Driver;
 import com.tourme.models.Itinerary;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,6 +80,16 @@ public class BidService {
     // Get all bids for a tourist's trips
     public List<Bid> getBidsForTourist(int touristId) {
         return bidRepository.findByItinerary_Tourist_UserId(touristId);
+    }
+
+    // Get all bids for a tourist's trips with driver contact details
+    public List<BidWithDriverDetailsDTO> getBidsForTouristWithDriverDetails(int touristId) {
+        List<Bid> bids = bidRepository.findByItinerary_Tourist_UserId(touristId);
+        List<BidWithDriverDetailsDTO> bidDTOs = new ArrayList<>();
+        for (Bid bid : bids) {
+            bidDTOs.add(new BidWithDriverDetailsDTO(bid));
+        }
+        return bidDTOs;
     }
 
     // Get one bid by its ID
