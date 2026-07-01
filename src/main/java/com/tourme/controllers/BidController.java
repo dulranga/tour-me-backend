@@ -71,11 +71,11 @@ public class BidController {
      *                 driver using their user ID.
      */
     @GetMapping("/driver/{driverId}")
-    // Return all bids made by a driver.
+    // Return all bids made by a driver, including itinerary and tourist details.
     public ResponseEntity<?> getBidsForDriver(@PathVariable int driverId, @AuthenticatedUser int authUserId) {
         try {
             authorizationService.validateUserAccess(driverId, authUserId);
-            List<Bid> bids = bidService.getBidsForDriver(driverId);
+            List<BidWithDriverDetailsDTO> bids = bidService.getBidsForDriverWithDetails(driverId);
             return ApiResponse.ok("Driver bids retrieved successfully", bids);
         } catch (Exception e) {
             return ApiResponse.internalServerError("Failed to retrieve driver bids: " + e.getMessage());

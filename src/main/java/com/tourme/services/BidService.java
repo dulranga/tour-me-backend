@@ -77,6 +77,16 @@ public class BidService {
         return bidRepository.findByDriver_UserId(driverId);
     }
 
+    // Get all bids by one driver with itinerary and tourist details
+    public List<BidWithDriverDetailsDTO> getBidsForDriverWithDetails(int driverId) {
+        List<Bid> bids = bidRepository.findByDriver_UserId(driverId);
+        List<BidWithDriverDetailsDTO> bidDTOs = new ArrayList<>();
+        for (Bid bid : bids) {
+            bidDTOs.add(new BidWithDriverDetailsDTO(bid));
+        }
+        return bidDTOs;
+    }
+
     // Get all bids for a tourist's trips
     public List<Bid> getBidsForTourist(int touristId) {
         return bidRepository.findByItinerary_Tourist_UserId(touristId);
