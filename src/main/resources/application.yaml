@@ -14,14 +14,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  
- 
 server:
   port: 8010
 
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
+  secret: ${JWT_SECRET:dev-secret}
+  expiration: ${JWT_EXPIRATION:3600000}
 
 springdoc:
   api-docs:

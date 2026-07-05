@@ -66,7 +66,7 @@ public class AuthController {
             accessTokenCookie.setSecure(true); // Only send over HTTPS
             accessTokenCookie.setPath("/");
             accessTokenCookie.setMaxAge(24 * 60 * 60); // 24 hours
-            accessTokenCookie.setAttribute("SameSite", "Strict");
+            accessTokenCookie.setAttribute("SameSite", "None");
             response.addCookie(accessTokenCookie);
 
             // Create and set refresh token cookie
@@ -75,7 +75,7 @@ public class AuthController {
             refreshTokenCookie.setSecure(true);
             refreshTokenCookie.setPath("/");
             refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-            refreshTokenCookie.setAttribute("SameSite", "Strict");
+            refreshTokenCookie.setAttribute("SameSite", "None");
             response.addCookie(refreshTokenCookie);
 
             // Create response data
@@ -117,6 +117,7 @@ public class AuthController {
         authCookie.setSecure(true);
         authCookie.setPath("/");
         authCookie.setMaxAge(0); // Delete cookie
+        authCookie.setAttribute("SameSite", "None");
         response.addCookie(authCookie);
 
         // Clear the refresh token cookie
@@ -125,6 +126,7 @@ public class AuthController {
         refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(0); // Delete cookie
+        refreshTokenCookie.setAttribute("SameSite", "None");
         response.addCookie(refreshTokenCookie);
 
         return ApiResponse.ok("Logout successful", null);
@@ -155,6 +157,7 @@ public class AuthController {
             accessTokenCookie.setSecure(true);
             accessTokenCookie.setPath("/");
             accessTokenCookie.setMaxAge(24 * 60 * 60); // 24 hours
+            accessTokenCookie.setAttribute("SameSite", "None");
             response.addCookie(accessTokenCookie);
 
             // Prepare response data

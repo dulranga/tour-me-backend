@@ -126,7 +126,8 @@ public class BidController {
      * @param touristId - The ID of the authenticated tourist
      */
     @GetMapping("/my-bids")
-    // Show all bids for itineraries owned by the logged-in tourist with driver contact details.
+    // Show all bids for itineraries owned by the logged-in tourist with driver
+    // contact details.
     public ResponseEntity<?> getBidsForTourist(@AuthenticatedUser int touristId) {
         try {
             authorizationService.validateUserRole(touristId, "TOURIST");
